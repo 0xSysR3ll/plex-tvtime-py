@@ -1,0 +1,24 @@
+services:
+  plex-tvtime-py:
+    image: 0xsysr3ll/plex-tvtime-py:latest
+    container_name: plex-tvtime-py
+    labels:
+      traefik.enable: true
+      traefik.http.routers.plex-tvtime-py.rule: Host(`tvtime.example.com`)
+      traefik.http.routers.plex-tvtime-py.entrypoints: https
+      traefik.http.routers.plex-tvtime-py.tls: true
+      traefik.http.services.plex-tvtime-py.loadbalancer.server.port: 5000
+      traefik.http.routers.plex-tvtime-py.middlewares: "default@file"
+      traefik.docker.network: "traefik_backend"
+    configs:
+      - source: tvtime_config
+        target: /app/config/config.yml
+    networks:
+      traefik_backend:
+
+configs:
+  tvtime_config:
+    file: ./config/config.yml
+networks:
+  traefik_backend:
+    external: true

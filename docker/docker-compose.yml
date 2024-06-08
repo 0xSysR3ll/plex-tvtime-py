@@ -1,0 +1,14 @@
+services:
+  plex-tvtime-py:
+    image: 0xsysr3ll/plex-tvtime-py:latest
+    container_name: plex-tvtime-py
+    ports:
+      - "5000:5000"
+    configs:
+      - source: tvtime_config
+        target: /app/config/config.yml
+    network_mode: Host
+
+configs:
+  tvtime_config:
+    file: ./config/config.yml
