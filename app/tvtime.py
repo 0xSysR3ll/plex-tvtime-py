@@ -224,7 +224,7 @@ class TVTime():
 
         watch_api = (
             f"https://{BASE_URL}/sidecar?"
-            f"o=https://msapi.tvtime.com/prod/v1/tracking/{movie_uuid}/follow"
+            f"o=https://msapi.tvtime.com/prod/v1/tracking/{movie_uuid}/watch"
         )
         try:
             r = requests.post(
@@ -241,7 +241,6 @@ class TVTime():
         except json.JSONDecodeError as _:
             log.error("Error decoding JSON response: %s", _)
             return
-
         status = result.get("status")
         if status is None or status != "success":
             log.error("Error while watching movie !")
