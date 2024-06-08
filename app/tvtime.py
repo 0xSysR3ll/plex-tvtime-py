@@ -162,7 +162,7 @@ class TVTime():
             None: This method does not raise any exceptions.
 
         """
-        
+
         if episode_id is None or not isinstance(episode_id, int):
             log.error("Invalid episode ID provided")
 
@@ -227,7 +227,7 @@ class TVTime():
         Raises:
             None: This method does not raise any exceptions.
         """
-        
+
         headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ class TVTime():
             log.info("Retrying to watch the movie...")
             self.watch_movie(movie_uuid=movie_uuid, retry=1)
             return
-        
+
         status = result.get("status")
         if status is None or status != "success":
             log.error("Error while watching movie !")
