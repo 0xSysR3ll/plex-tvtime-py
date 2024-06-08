@@ -10,7 +10,7 @@ License: see the LICENSE file.
 import os
 import json
 from werkzeug.http import parse_options_header
-from werkzeug.formparser import parse_form_data
+from werkzeug.exceptions import BadRequest
 from flask import Flask, request
 from tvtime import TVTime # pylint: disable=import-error
 from utils.config import Config # pylint: disable=import-error
@@ -90,10 +90,10 @@ class WebhookHandler:
         if 'boundary' in pdict:
             pdict['boundary'] = pdict['boundary'].encode("utf-8")
         try:
-            form_data, _, _ = parse_form_data(request.environ)
+            form_data = request.form
             return form_data.to_dict(flat=False)
-        except request.exceptions.RequestException as e:
-            log.error('Error parsing form data: %s', e)
+        except BadRequest as _:
+            log.error('Error parsing form data: %s', _)
             return None
 
     @staticmethod
@@ -133,7 +133,6 @@ class WebhookHandler:
         """
         event = webhook_data.get('event')
         if event != "media.scrobble":
-            log.error('Invalid event')
             return '', 204
 
         metadata = webhook_data.get('Metadata')
