@@ -54,7 +54,7 @@ class WebhookHandler:
     """
     Class representing a webhook handler for TVTime integration with Plex.
     """
-    
+
     @staticmethod
     def parse_content_type():
         """
