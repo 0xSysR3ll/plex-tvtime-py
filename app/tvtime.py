@@ -148,7 +148,7 @@ class TVTime():
 
         log.info("Successfully connected to your account !")
 
-    def watch_episode(self, episode_id: int) -> None:
+    def watch_episode(self, episode_id: int, retry: bool=False) -> None:
         """
         Marks an episode as watched in TVTime.
 
@@ -162,6 +162,13 @@ class TVTime():
             None: This method does not raise any exceptions.
 
         """
+        tvtime = self.TVTime(username=self.username,
+            password=self.password,
+            driver_location='/usr/local/bin/geckodriver',
+            browser_location='/usr/bin/firefox-esr'
+        )
+        tvtime.login()
+        
         if episode_id is None or not isinstance(episode_id, int):
             log.error("Invalid episode ID provided")
 
@@ -190,6 +197,16 @@ class TVTime():
             result = r.json()
         except json.JSONDecodeError as _:
             log.error("Error decoding JSON response: %s", _)
+            if retry:
+                log.error(
+                    "Error while watching movie a second time !"
+                    "Something is not right..."
+                )
+                return
+            log.debug("Maybe the jwt token has expired, trying to refresh it...")
+            self.login()
+            log.info("Retrying to watch the episode...")
+            self.watch_episode(episode_id=episode_id, retry=True)
             return
 
         status = result.get("result")
@@ -203,7 +220,7 @@ class TVTime():
         log.info(
             f"Successfully marked {show} S{season}E{episode} as watched !")
 
-    def watch_movie(self, movie_uuid: str) -> None:
+    def watch_movie(self, movie_uuid: str, retry: bool=False) -> None:
         """
         Watch a movie on TVTime.
 
@@ -216,6 +233,7 @@ class TVTime():
         Raises:
             None: This method does not raise any exceptions.
         """
+        
         headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json',
@@ -240,7 +258,18 @@ class TVTime():
             result = r.json()
         except json.JSONDecodeError as _:
             log.error("Error decoding JSON response: %s", _)
+            if retry:
+                log.error(
+                    "Error while watching movie a second time !"
+                    "Something is not right..."
+                )
+                return
+            log.debug("Maybe the jwt token has expired, trying to refresh it...")
+            self.login()
+            log.info("Retrying to watch the movie...")
+            self.watch_movie(movie_uuid=movie_uuid, retry=1)
             return
+        
         status = result.get("status")
         if status is None or status != "success":
             log.error("Error while watching movie !")
