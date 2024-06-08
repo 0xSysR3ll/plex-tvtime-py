@@ -162,12 +162,6 @@ class TVTime():
             None: This method does not raise any exceptions.
 
         """
-        tvtime = self.TVTime(username=self.username,
-            password=self.password,
-            driver_location='/usr/local/bin/geckodriver',
-            browser_location='/usr/bin/firefox-esr'
-        )
-        tvtime.login()
         
         if episode_id is None or not isinstance(episode_id, int):
             log.error("Invalid episode ID provided")
