@@ -31,11 +31,11 @@ class Webhook():  # pylint: disable=too-few-public-methods
     Class representing a webhook for TVTime integration with Plex.
     """
 
-    def __init__(self, user, username, password):
+    def __init__(self, plex_user: str, tvtime_username: str, tvtime_password: str):
         self.tvtime = None
-        self.user = user
-        self.username = username
-        self.password = password
+        self.user = plex_user
+        self.username = tvtime_username
+        self.password = tvtime_password
 
     def run(self):
         """
@@ -76,8 +76,8 @@ class WebhookHandler:
                 log.error('Invalid content type')
                 return None, None
             return content_type, pdict
-        except request.exceptions.RequestException as e:
-            log.error('Error parsing content type: %s', e)
+        except request.exceptions.RequestException as _:
+            log.error('Error parsing content type: %s', _)
             return None, None
 
     @staticmethod
@@ -118,8 +118,8 @@ class WebhookHandler:
         payload = post_vars['payload'][0]
         try:
             return json.loads(payload)
-        except json.JSONDecodeError as e:
-            log.error('Error decoding JSON payload: %s', e)
+        except json.JSONDecodeError as _:
+            log.error('Error decoding JSON payload: %s', _)
             return None
 
     @staticmethod
@@ -169,7 +169,8 @@ class WebhookHandler:
             for guid in guids
             if guid.get('id').startswith('tvdb://')
         ][0]
-        log.debug("Received a scrobble event for the %s: %s", media_type, media_name)
+        log.debug("Received a scrobble event for the %s: %s",
+                  media_type, media_name)
 
         if media_type == 'movie':
             movie_uuid = Webhook.tvtime.get_movie_uuid(movie_id=media_id)
@@ -214,8 +215,17 @@ if __name__ == '__main__':
     USERS = config.get_config_of('users')
     threads = []
     for user, _ in USERS.items():
-        username = _['tvtime']['username']
-        password = _['tvtime']['password']
-        t = threading.Thread(target=Webhook(user, username, password).run)
+        username: str = None
+        password: str = None
+        try:
+            username = _['tvtime']['username']
+            password = _['tvtime']['password']
+        except KeyError as _:
+            log.error('Error parsing configuration : %s', _)
+            continue
+        t = threading.Thread(
+            target=Webhook(
+                user, username, password
+            ).run)
         t.start()
         threads.append(t)

@@ -29,7 +29,7 @@ class TVTime():
     """
 
     def __init__(
-        self, user: str, username: str = None, password: str = None,
+        self, plex_user: str, tvtime_username: str = None, tvtime_password: str = None,
         driver_location: str = None, browser_location: str = None
     ):
         """
@@ -42,9 +42,9 @@ class TVTime():
             driver_location (str): The location of the Firefox driver executable.
             browser_location (str): The location of the Firefox browser executable.
         """
-        self.user = user
-        self.username = username
-        self.password = password
+        self.user = plex_user
+        self.username = tvtime_username
+        self.password = tvtime_password
         self.token: str = ""
         self.refresh_token: str = ""
         options = Options()
