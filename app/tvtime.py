@@ -12,9 +12,10 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
-from utils.logger import logging as log # pylint: disable=import-error
+from utils.logger import logging as log  # pylint: disable=import-error
 
 BASE_URL = "app.tvtime.com"
+
 
 class TVTime():
     """
@@ -28,18 +29,20 @@ class TVTime():
     """
 
     def __init__(
-        self, username: str = None, password: str = None,
+        self, user: str, username: str = None, password: str = None,
         driver_location: str = None, browser_location: str = None
     ):
         """
         Initializes a new instance of the TVTime class.
 
         Args:
+            user (str): The name of plex's user to map with TVTime.
             username (str): The username for the TVTime account.
             password (str): The password for the TVTime account.
             driver_location (str): The location of the Firefox driver executable.
             browser_location (str): The location of the Firefox browser executable.
         """
+        self.user = user
         self.username = username
         self.password = password
         self.token: str = ""
@@ -59,7 +62,7 @@ class TVTime():
             log.info("Initializing Firefox driver")
             self.driver = webdriver.Firefox(
                 service=Service(driver_location), options=options)
-        except Exception as _: # pylint: disable=broad-except
+        except Exception as _:  # pylint: disable=broad-except
             log.error("Error initializing Firefox driver: %s ", _)
             sys.exit(1)
 
@@ -92,7 +95,7 @@ class TVTime():
                     "return window.localStorage.getItem('flutter.jwtToken');")
                 if jwt_token:
                     break
-            except Exception as _: # pylint: disable=broad-except
+            except Exception as _:  # pylint: disable=broad-except
                 log.error("Error fetching JWT token: %s", _)
                 break
 
@@ -146,9 +149,9 @@ class TVTime():
             log.error("Error crafting JWT token for TVTime API : %s", _)
             sys.exit(1)
 
-        log.info("Successfully connected to your account !")
+        log.info("Successfully connected to %s's TVtime account !", self.user)
 
-    def watch_episode(self, episode_id: int, retry: bool=False) -> None:
+    def watch_episode(self, episode_id: int, retry: bool = False) -> None:
         """
         Marks an episode as watched in TVTime.
 
@@ -174,7 +177,8 @@ class TVTime():
 
         watch_api = (
             f'https://{BASE_URL}/sidecar?'
-            f'o=https://api2.tozelabs.com/v2/watched_episodes/episode/{episode_id}'
+            f'o=https://api2.tozelabs.com/v2/watched_episodes/episode/{
+                episode_id}'
             '&is_rewatch=0'
         )
         try:
@@ -214,7 +218,7 @@ class TVTime():
         log.info(
             f"Successfully marked {show} S{season}E{episode} as watched !")
 
-    def watch_movie(self, movie_uuid: str, retry: bool=False) -> None:
+    def watch_movie(self, movie_uuid: str, retry: bool = False) -> None:
         """
         Watch a movie on TVTime.
 

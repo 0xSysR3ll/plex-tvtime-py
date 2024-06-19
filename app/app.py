@@ -7,33 +7,35 @@ License: see the LICENSE file.
 
 """
 
+import threading
 import os
 import json
 from werkzeug.http import parse_options_header
 from werkzeug.exceptions import BadRequest
 from flask import Flask, request
-from tvtime import TVTime # pylint: disable=import-error
-from utils.config import Config # pylint: disable=import-error
-from utils.logger import setup_logging, logging as log # pylint: disable=import-error
+from tvtime import TVTime  # pylint: disable=import-error
+from utils.config import Config  # pylint: disable=import-error
+from utils.logger import setup_logging, logging as log  # pylint: disable=import-error
 
 setup_logging()
 config = Config('config/config.yml')
 config.load()
-
-TVTIME_CONFIG = config.get_config_of('tvtime')
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.logger.setLevel(log.ERROR)
 
 
-class Webhook(): # pylint: disable=too-few-public-methods
+class Webhook():  # pylint: disable=too-few-public-methods
     """
     Class representing a webhook for TVTime integration with Plex.
     """
 
-    def __init__(self):
+    def __init__(self, user, username, password):
         self.tvtime = None
+        self.user = user
+        self.username = username
+        self.password = password
 
     def run(self):
         """
@@ -41,14 +43,16 @@ class Webhook(): # pylint: disable=too-few-public-methods
         """
         log.info("Starting TVTime integration")
         Webhook.tvtime = TVTime(
-            username=TVTIME_CONFIG['username'],
-            password=TVTIME_CONFIG['password'],
+            user=self.user,
+            username=self.username,
+            password=self.password,
             driver_location='/usr/local/bin/geckodriver',
             browser_location='/usr/bin/firefox-esr'
         )
         Webhook.tvtime.login()
         log.info("TVTime integration started")
         app.run(host='0.0.0.0', port=5000, debug=False)
+
 
 class WebhookHandler:
     """
@@ -66,7 +70,8 @@ class WebhookHandler:
             If the content type or parameters are invalid, returns (None, None).
         """
         try:
-            content_type, pdict = parse_options_header(request.headers.get('Content-Type'))
+            content_type, pdict = parse_options_header(
+                request.headers.get('Content-Type'))
             if not isinstance(content_type, str) or not isinstance(pdict, dict):
                 log.error('Invalid content type')
                 return None, None
@@ -140,10 +145,15 @@ class WebhookHandler:
             log.error('Metadata not found in payload')
             return '', 204
 
+        user = webhook_data.get('Account').get('title')
+        if user != Webhook.tvtime.user:
+            log.warning('User does not match any TVtime account')
+            return '', 204
+
         media_type = metadata.get('librarySectionType')
-        if media_type == 'movie' :
+        if media_type == 'movie':
             media_name = metadata.get('title')
-        else :
+        else:
             media_name = metadata.get('grandparentTitle')
         if not media_name:
             log.error('Media name not found in metadata')
@@ -158,7 +168,7 @@ class WebhookHandler:
             int(guid.get('id').split('tvdb://')[-1])
             for guid in guids
             if guid.get('id').startswith('tvdb://')
-            ][0]
+        ][0]
         log.debug("Received a scrobble event for the %s: %s", media_type, media_name)
 
         if media_type == 'movie':
@@ -199,6 +209,13 @@ class WebhookHandler:
 
         return WebhookHandler.handle_media(webhook_data)
 
+
 if __name__ == '__main__':
-    webhook = Webhook()
-    webhook.run()
+    USERS = config.get_config_of('users')
+    threads = []
+    for user, _ in USERS.items():
+        username = _['tvtime']['username']
+        password = _['tvtime']['password']
+        t = threading.Thread(target=Webhook(user, username, password).run)
+        t.start()
+        threads.append(t)
