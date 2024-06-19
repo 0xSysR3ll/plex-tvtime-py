@@ -31,7 +31,7 @@ class Webhook():  # pylint: disable=too-few-public-methods
     Class representing a webhook for TVTime integration with Plex.
     """
 
-    def __init__(self, plex_user: str, tvtime_username: str, tvtime_password: str):
+    def __init__(self, plex_user: str, tvtime_username: str, tvtime_password: str): # pylint: disable=too-many-arguments
         self.tvtime = None
         self.user = plex_user
         self.username = tvtime_username
@@ -123,7 +123,7 @@ class WebhookHandler:
             return None
 
     @staticmethod
-    def handle_media(webhook_data: dict):
+    def handle_media(webhook_data: dict): # pylint: disable=too-many-return-statements
         """
         Handles the media scrobble event received from the webhook.
 
@@ -145,8 +145,8 @@ class WebhookHandler:
             log.error('Metadata not found in payload')
             return '', 204
 
-        user = webhook_data.get('Account').get('title')
-        if user != Webhook.tvtime.user:
+        plex_user = webhook_data.get('Account').get('title')
+        if plex_user != Webhook.tvtime.user:
             log.warning('User does not match any TVtime account')
             return '', 204
 
