@@ -31,7 +31,7 @@ class TVTime():
     def __init__(
         self, plex_user: str, tvtime_username: str = None, tvtime_password: str = None,
         driver_location: str = None, browser_location: str = None
-    ):
+    ): # pylint: disable=too-many-arguments
         """
         Initializes a new instance of the TVTime class.
 
