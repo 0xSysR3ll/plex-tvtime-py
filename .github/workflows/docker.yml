@@ -20,6 +20,8 @@ env:
   REGISTRY: registry.0xsysr3ll.fr
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  UID: 1000
+  GID: 1000
 
 
 jobs:
@@ -84,9 +86,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args:
-            UID = ${{ vars.BUILD_UID }}
-            GID = ${{ vars.BUILD_GID }}
+          build-args: |
+            UID: ${{ env.UID }}
+            GID: ${{ env.GID }}
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
