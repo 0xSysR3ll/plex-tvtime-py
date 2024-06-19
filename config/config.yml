@@ -1,3 +1,5 @@
-tvtime:
-  username: <tvtime_email>
-  password: <tvtime_password>
+users:
+  <plex_username>:
+    tvtime:
+      username: <tvtime_email>
+      password: <tvtime_password>
