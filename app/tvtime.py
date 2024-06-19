@@ -177,8 +177,7 @@ class TVTime():
 
         watch_api = (
             f'https://{BASE_URL}/sidecar?'
-            f'o=https://api2.tozelabs.com/v2/watched_episodes/episode/{
-                episode_id}'
+            f'o=https://api2.tozelabs.com/v2/watched_episodes/episode/{episode_id}'
             '&is_rewatch=0'
         )
         try:
