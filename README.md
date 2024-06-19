@@ -31,3 +31,11 @@ Contributions are welcome! If you have any ideas, bug reports, or feature reques
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+
+## Disclaimer
+
+This project is inspired by [@Zggis](https://github.com/Zggis/plex-tvtime) and serves as a homage to the original work.
+It is developed with the intention of building upon the ideas presented by [@Zggis](https://github.com/Zggis/plex-tvtime), offering new features or improvements.
+
+This project does not copy any proprietary code or infringe upon the original author's intellectual property.
+It is created with respect and admiration for the original work, aiming to contribute to the community by providing an alternative or complementary solution.
