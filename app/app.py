@@ -41,7 +41,7 @@ class Webhook():  # pylint: disable=too-few-public-methods
         """
         Runs the TVTime integration webhook.
         """
-        log.info("Starting TVTime integration")
+        log.info("Starting TVTime integration...")
         Webhook.tvtime = TVTime(
             user=self.user,
             username=self.username,
@@ -50,7 +50,7 @@ class Webhook():  # pylint: disable=too-few-public-methods
             browser_location='/usr/bin/firefox-esr'
         )
         Webhook.tvtime.login()
-        log.info("TVTime integration started")
+        log.info("TVTime integration started !")
         app.run(host='0.0.0.0', port=5000, debug=False)
 
 
@@ -147,7 +147,7 @@ class WebhookHandler:
 
         plex_user = webhook_data.get('Account').get('title')
         if plex_user != Webhook.tvtime.user:
-            log.warning('User does not match any TVtime account')
+            log.debug('[%s] User does not have any TVtime account configured', plex_user)
             return '', 204
 
         media_type = metadata.get('librarySectionType')
@@ -169,8 +169,8 @@ class WebhookHandler:
             for guid in guids
             if guid.get('id').startswith('tvdb://')
         ][0]
-        log.debug("Received a scrobble event for the %s: %s",
-                  media_type, media_name)
+        log.debug("[%s] Received a scrobble event for the %s : %s",
+                plex_user, media_type, media_name)
 
         if media_type == 'movie':
             movie_uuid = Webhook.tvtime.get_movie_uuid(movie_id=media_id)

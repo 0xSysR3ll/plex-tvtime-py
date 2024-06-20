@@ -59,7 +59,7 @@ class TVTime():
             options.binary_location = browser_location
 
         try:
-            log.info("Initializing Firefox driver")
+            log.info("Initializing Firefox driver...")
             self.driver = webdriver.Firefox(
                 service=Service(driver_location), options=options)
         except Exception as _:  # pylint: disable=broad-except
@@ -117,7 +117,7 @@ class TVTime():
             "username": self.username,
             "password": self.password
         }
-        log.debug("Trying to connect to your account...")
+        log.debug("Trying to connect to %s's TVTime account...", self.user)
         login_url = (
             'https://beta-app.tvtime.com/sidecar?'
             'o=https://auth.tvtime.com/v1/login'
@@ -215,7 +215,7 @@ class TVTime():
         show = result.get("show").get("name")
 
         log.info(
-            f"Successfully marked {show} S{season}E{episode} as watched !")
+            "[%s] Successfully marked %s S%sE%s as watched !", self.user, show, season, episode)
 
     def watch_movie(self, movie_uuid: str, retry: bool = False) -> None:
         """
@@ -272,7 +272,7 @@ class TVTime():
             log.error("Error while watching movie !")
             return
 
-        log.info("Successfully marked the movie as watched !")
+        log.info("[%s] Successfully marked the movie as watched !", self.user)
 
     def get_movie_uuid(self, movie_id: int) -> str:
         """
