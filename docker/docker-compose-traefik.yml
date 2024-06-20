@@ -10,6 +10,8 @@ services:
       traefik.http.services.plex-tvtime-py.loadbalancer.server.port: 5000
       traefik.http.routers.plex-tvtime-py.middlewares: "default@file"
       traefik.docker.network: "traefik_backend"
+    environment:
+      - TZ=Etc/UTC # Set your timezone
     configs:
       - source: tvtime_config
         target: /app/config/config.yml

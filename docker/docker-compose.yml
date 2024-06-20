@@ -7,6 +7,8 @@ services:
     configs:
       - source: tvtime_config
         target: /app/config/config.yml
+    environment:
+      - TZ=Etc/UTC # Set your timezone
     network_mode: Host
 
 configs:
