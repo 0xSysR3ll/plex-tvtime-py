@@ -145,7 +145,7 @@ class WebhookHandler:
             log.error('Metadata not found in payload')
             return '', 204
 
-        plex_user = webhook_data.get('Account').get('title')
+        plex_user = webhook_data.get('Account').get('title').lower()
         if plex_user != Webhook.tvtime.user:
             log.debug('[%s] User does not have any TVtime account configured', plex_user)
             return '', 204
