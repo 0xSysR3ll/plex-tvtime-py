@@ -7,29 +7,42 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/0xsysr3ll/plex-tvtime-py)](https://hub.docker.com/r/0xsysr3ll/plex-tvtime-py)
 
 
-**Plex TVTime PY** is a small python application for Plex that integrates with TVTime, a popular TV show tracking service. With this application, you can sync your TVTime watchlist with Plex and easily keep track of your favorite shows.
+**Plex TVTime PY** is a small python application for [Plex](https://plex.tv) that integrates with [TVTime](https://www.tvtime.com), a popular TV show tracking service.
+With this application, you can sync your TVTime watchlist with Plex and easily keep track of your favorite shows.
 
 ## Features
 
-- Sync your TVTime watchlist with Plex (movies and series)
+- [x] Sync your TVTime watchlist with Plex (movies and series)
+- [x] Multi-user support
 
 ## Installation
 
 To deploy and configure the application, follow these steps:
 
 1. Create a `config/config.yml` file based on the example provided.
+```yml
+users:
+  <plex_username>:
+    tvtime:
+      username: <tvtime_email>
+      password: <tvtime_password>
+```
 2. Launch the Docker container using the provided `docker-compose.yml` file (make any necessary adaptations).
-3. In Plex, go to Settings > Webhooks.
+3. In Plex, go to `Settings > Webhooks`.
 4. Add a new webhook with the URL exposed by the docker (the docker publishes the port `5000` by default).
+> [!NOTE]
 > If you are not using a reverse proxy, it would be `http://<your_ip>:5000`
 
 ## Usage
+
 Once the webhook is deployed and configured, your TVTime watchlist will automatically sync with Plex.
 
 ## Contributing
-Contributions are welcome! If you have any ideas, bug reports, or feature requests, please open an issue or submit a pull request on GitHub.
+
+Contributions are welcome! If you have any ideas, bug reports, or feature requests, please open an [issue](https://github.com/0xSysR3ll/plex-tvtime-py/issues) or submit a [pull request](https://github.com/0xSysR3ll/plex-tvtime-py/pulls) on GitHub.
 
 ## License
+
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
 
 ## Disclaimer
