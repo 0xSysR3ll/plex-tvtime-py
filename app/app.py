@@ -43,9 +43,9 @@ class Webhook():  # pylint: disable=too-few-public-methods
         """
         log.info("Starting TVTime integration...")
         Webhook.tvtime = TVTime(
-            user=self.user,
-            username=self.username,
-            password=self.password,
+            plex_user=self.user,
+            tvtime_username=self.username,
+            tvtime_password=self.password,
             driver_location='/usr/local/bin/geckodriver',
             browser_location='/usr/bin/firefox-esr'
         )

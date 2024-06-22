@@ -36,9 +36,9 @@ class TVTime():
         Initializes a new instance of the TVTime class.
 
         Args:
-            user (str): The name of plex's user to map with TVTime.
-            username (str): The username for the TVTime account.
-            password (str): The password for the TVTime account.
+            plex_user (str): The name of plex's user to map with TVTime.
+            tvtime_username (str): The username for the TVTime account.
+            tvtime_password (str): The password for the TVTime account.
             driver_location (str): The location of the Firefox driver executable.
             browser_location (str): The location of the Firefox browser executable.
         """
