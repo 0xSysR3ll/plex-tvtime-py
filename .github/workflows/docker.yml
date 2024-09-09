@@ -1,28 +1,21 @@
 name: Build and push Docker image
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 on:
   schedule:
-    - cron: '39 6 * * *'
+    - cron: '39 6 * * *'  # Scheduled builds
   push:
-    branches: [ "main" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
+    branches: [ "main" ]  # Builds and pushes on the main branch
+    tags: [ 'v*.*.*' ]  # Builds and pushes only semver tags
   pull_request:
     branches: [ "main" ]
 
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: registry.0xsysr3ll.fr
-  # github.repository as <account>/<repo>
+  # GitHub repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   UID: 1000
   GID: 1000
-
 
 jobs:
   build:
@@ -30,57 +23,49 @@ jobs:
     permissions:
       contents: read
       packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
+      id-token: write  # Required for signing
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       # Install the cosign tool except on PR
-      # https://github.com/sigstore/cosign-installer
       - name: Install cosign
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v3.3.0
         with:
           cosign-release: 'v2.2.2'
 
-      # Set up BuildKit Docker container builder to be able to build
-      # multi-platform images and export cache
-      # https://github.com/docker/setup-buildx-action
+      # Set up BuildKit Docker container builder to support multi-platform images
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+        uses: docker/setup-buildx-action@v3.0.0
 
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
+      # Log into the Docker registry, but not for PRs
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.REG_USERNAME }}
           password: ${{ secrets.REG_PASSWORD }}
 
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
+      # Extract metadata (tags, labels) for Docker images
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest
 
-      # Build and push Docker image with Buildx (don't push on PR)
-      # https://github.com/docker/build-push-action
+      # Build and push Docker image (push only on tags, not for PRs or regular commits)
       - name: Build and push Docker image
         id: build-and-push
-        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        uses: docker/build-push-action@v5.0.0
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}  # Only push on semver tags
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -89,17 +74,10 @@ jobs:
             UID=${{ env.UID }}
             GID=${{ env.GID }}
 
-      # Sign the resulting Docker image digest except on PRs.
-      # This will only write to the public Rekor transparency log when the Docker
-      # repository is public to avoid leaking data.  If you would like to publish
-      # transparency data even for private images, pass --force to cosign below.
-      # https://github.com/sigstore/cosign
+      # Sign the resulting Docker image digest (only for non-PRs)
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
-          # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
           TAGS: ${{ steps.meta.outputs.tags }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
-        # This step uses the identity token to provision an ephemeral certificate
-        # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
