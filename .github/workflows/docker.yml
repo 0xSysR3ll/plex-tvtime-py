@@ -65,7 +65,7 @@ jobs:
         uses: docker/build-push-action@v5.0.0
         with:
           context: .
-          push: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}  # Only push on semver tags
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -74,10 +74,17 @@ jobs:
             UID=${{ env.UID }}
             GID=${{ env.GID }}
 
+
       # Sign the resulting Docker image digest (only for non-PRs)
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
-        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+        run: |
+          if [ -n "${DIGEST}" ]; then
+            echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+          else
+            echo "No digest found, skipping image signing."
+          fi
+
