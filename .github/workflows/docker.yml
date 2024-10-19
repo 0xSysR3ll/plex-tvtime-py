@@ -1,90 +1,51 @@
-name: Build and push Docker image
+#
+name: Create and publish Docker image
 
 on:
-  schedule:
-    - cron: '39 6 * * *'  # Scheduled builds
   push:
-    branches: [ "main" ]  # Builds and pushes on the main branch
-    tags: [ 'v*.*.*' ]  # Builds and pushes only semver tags
-  pull_request:
-    branches: [ "main" ]
+    branches: ['release']
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: registry.0xsysr3ll.fr
-  # GitHub repository as <account>/<repo>
+  REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  UID: 1000
-  GID: 1000
 
 jobs:
-  build:
+  build-and-push-image:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-      id-token: write  # Required for signing
-
+      attestations: write
+      id-token: write
+      # 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Install the cosign tool except on PR
-      - name: Install cosign
-        if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@v3.3.0
-        with:
-          cosign-release: 'v2.2.2'
-
-      # Set up BuildKit Docker container builder to support multi-platform images
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.0.0
-
-      # Log into the Docker registry, but not for PRs
-      - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3.0.0
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.REG_USERNAME }}
-          password: ${{ secrets.REG_PASSWORD }}
-
-      # Extract metadata (tags, labels) for Docker images
-      - name: Extract Docker metadata
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest
 
-      # Build and push Docker image (push only on tags, not for PRs or regular commits)
       - name: Build and push Docker image
-        id: build-and-push
-        uses: docker/build-push-action@v5.0.0
+        id: push
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            UID=${{ env.UID }}
-            GID=${{ env.GID }}
-
-
-      # Sign the resulting Docker image digest (only for non-PRs)
-      - name: Sign the published Docker image
-        if: ${{ github.event_name != 'pull_request' }}
-        env:
-          TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.build-and-push.outputs.digest }}
-        run: |
-          if [ -n "${DIGEST}" ]; then
-            echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
-          else
-            echo "No digest found, skipping image signing."
-          fi
-
+      
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+      
