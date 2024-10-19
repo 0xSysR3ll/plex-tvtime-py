@@ -5,6 +5,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/0xsysr3ll/plex-tvtime-py)](https://github.com/0xsysr3ll/plex-tvtime-py/stargazers)
 [![Python Version](https://img.shields.io/badge/python-3.10%20|%203.11%20-blue)](https://www.python.org/downloads/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/0xsysr3ll/plex-tvtime-py)](https://hub.docker.com/r/0xsysr3ll/plex-tvtime-py)
+[![Build](https://github.com/0xSysR3ll/plex-tvtime-py/actions/workflows/docker.yml/badge.svg?branch=main)](https://github.com/0xSysR3ll/plex-tvtime-py/actions/workflows/docker.yml)
 
 
 **Plex TVTime PY** is a small python application for [Plex](https://plex.tv) that integrates with [TVTime](https://www.tvtime.com), a popular TV show tracking service.
