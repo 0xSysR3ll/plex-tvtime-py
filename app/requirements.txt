@@ -1,6 +1,6 @@
 Flask==3.0.3
 PyYAML==6.0.2
 Requests==2.32.3
-selenium==4.25.0
+selenium==4.26.1
 termcolor==2.5.0
 Werkzeug==3.0.4
