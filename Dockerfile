@@ -1,10 +1,10 @@
 FROM python:3.11-alpine
 
-ARG UID
-ARG GID
+ARG BUILD_UID
+ARG BUILD_GID
 
 # Create a non-root user
-RUN addgroup -g $GID app && adduser -D -u $UID -G app app
+RUN addgroup -g $BUILD_UID app && adduser -D -u $BUILD_GID -G app app
 
 WORKDIR /app
 
