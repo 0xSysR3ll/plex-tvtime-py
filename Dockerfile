@@ -4,7 +4,7 @@ ARG BUILD_UID
 ARG BUILD_GID
 
 # Create a non-root user
-RUN addgroup -g $BUILD_UID app && adduser -D -u $BUILD_GID -G app app
+RUN addgroup -g $BUILD_GID app && adduser -D -u $BUILD_UID -G app app
 
 WORKDIR /app
 
