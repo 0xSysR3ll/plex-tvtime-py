@@ -42,8 +42,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            UID=${{ env.UID }}
-            GID=${{ env.GID }}
+            BUILD_UID=${{ env.BUILD_UID }}
+            BUILD_GID=${{ env.BUILD_GID }}
       
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
