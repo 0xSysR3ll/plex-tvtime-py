@@ -30,7 +30,7 @@ users:
 ```
 2. Launch the Docker container using the provided `docker-compose.yml` file (make any necessary adaptations).
 3. In Plex, go to `Settings > Webhooks`.
-4. Add a new webhook with the URL exposed by the docker (the docker publishes the port `5000` by default).
+4. Add a new webhook with the URL exposed by the docker: http://example.com/tvtime/plex (the docker publishes the port `5000` by default).
 > [!NOTE]
 > If you are not using a reverse proxy, it would be `http://<your_ip>:5000`
 
