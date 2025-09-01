@@ -32,7 +32,9 @@ jobs:
 
       - name: Test Docker build
         run: |
-          docker build -t plex-tvtime-py:test .
+          docker build -t plex-tvtime-py:test . \
+          --build-arg BUILD_UID=1000 \
+          --build-arg BUILD_GID=1000
 
   docker:
     runs-on: ubuntu-latest
@@ -90,3 +92,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            BUILD_UID=1000
+            BUILD_GID=1000
