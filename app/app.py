@@ -8,24 +8,28 @@ License: see the LICENSE file.
 """
 
 import json
+import logging
 import os
 import threading
 
 from flask import Flask, request
 from tvtime import TVTime  # pylint: disable=import-error
 from utils.config import Config  # pylint: disable=import-error
-from utils.logger import logging as log
 from utils.logger import setup_logging  # pylint: disable=import-error
 from werkzeug.exceptions import BadRequest
 from werkzeug.http import parse_options_header
 
 setup_logging()
+log = logging.getLogger(__name__)
 config = Config("config/config.yml")
 config.load()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-app.logger.setLevel(log.ERROR)
+# Set log level from config
+log_level = config.get_config_of("logging.level", "INFO")
+app.logger.setLevel(getattr(logging, log_level.upper()))
+log.setLevel(getattr(logging, log_level.upper()))
 
 
 class Webhook:  # pylint: disable=too-few-public-methods

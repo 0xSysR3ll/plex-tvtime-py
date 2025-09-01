@@ -26,12 +26,22 @@ class Config:
         except FileNotFoundError as exc:
             logging.error("Config file not found: %s", exc)
 
-    def get_config_of(self, key: str) -> dict[str, str]:
+    def get_config_of(self, key: str, default=None):
         """
         This method retrieves the configuration data for the given key.
+        Supports nested keys with dot notation (e.g., "logging.level").
         """
         if self.config is None:
             self.load()
-        if self.config is not None:
-            return self.config[key]
-        return {}
+        if self.config is None:
+            return default
+
+        # Handle nested keys
+        keys = key.split(".")
+        value = self.config
+        for k in keys:
+            if isinstance(value, dict) and k in value:
+                value = value[k]
+            else:
+                return default
+        return value
