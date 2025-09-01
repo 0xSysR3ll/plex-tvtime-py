@@ -12,6 +12,12 @@ services:
       traefik.docker.network: "traefik_backend"
     environment:
       - TZ=Etc/UTC # Set your timezone
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     configs:
       - source: tvtime_config
         target: /app/config/config.yml
