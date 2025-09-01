@@ -8,9 +8,9 @@ License: see the LICENSE file.
 """
 
 import json
+import logging
 import os
 import threading
-import logging
 
 from flask import Flask, request
 from tvtime import TVTime  # pylint: disable=import-error

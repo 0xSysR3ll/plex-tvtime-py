@@ -35,9 +35,9 @@ class Config:
             self.load()
         if self.config is None:
             return default
-            
+
         # Handle nested keys
-        keys = key.split('.')
+        keys = key.split(".")
         value = self.config
         for k in keys:
             if isinstance(value, dict) and k in value:
