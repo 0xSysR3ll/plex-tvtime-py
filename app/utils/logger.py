@@ -1,7 +1,9 @@
 """
 This module provides a ColoredFormatter class for colored logging output.
 """
+
 import logging
+
 from termcolor import colored
 
 
@@ -11,11 +13,11 @@ class ColoredFormatter(logging.Formatter):
     """
 
     COLORS = {
-        'WARNING': 'yellow',
-        'INFO': 'white',
-        'DEBUG': 'blue',
-        'CRITICAL': 'red',
-        'ERROR': 'red',
+        "WARNING": "yellow",
+        "INFO": "white",
+        "DEBUG": "blue",
+        "CRITICAL": "red",
+        "ERROR": "red",
     }
 
     def format(self, record):

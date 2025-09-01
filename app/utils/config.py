@@ -3,11 +3,11 @@ This module contains the Config class which is used to load and get configuratio
 """
 
 import logging
-from typing import Dict
+
 import yaml
 
 
-class Config():
+class Config:
     """
     This class is used to load and get configuration data.
     """
@@ -21,12 +21,12 @@ class Config():
         This method loads the configuration data from the specified path.
         """
         try:
-            with open(self.config_path, 'r', encoding='utf-8') as f:
+            with open(self.config_path, encoding="utf-8") as f:
                 self.config = yaml.safe_load(f)
         except FileNotFoundError as exc:
             logging.error("Config file not found: %s", exc)
 
-    def get_config_of(self, key: str) -> Dict[str, str]:
+    def get_config_of(self, key: str) -> dict[str, str]:
         """
         This method retrieves the configuration data for the given key.
         """

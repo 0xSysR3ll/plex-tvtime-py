@@ -5,19 +5,20 @@ This module provides a class for interacting with the TVTime API.
 It includes methods for logging in, marking episodes as watched, and watching movies on TVTime.
 """
 
-import time
 import json
 import sys
+import time
+
 import requests
 from selenium import webdriver
-from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from utils.logger import logging as log  # pylint: disable=import-error
 
 BASE_URL = "app.tvtime.com"
 
 
-class TVTime():
+class TVTime:
     """
     A class for interacting with the TVTime API.
 
@@ -29,9 +30,13 @@ class TVTime():
     """
 
     def __init__(
-        self, plex_user: str, tvtime_username: str = None, tvtime_password: str = None,
-        driver_location: str = None, browser_location: str = None
-    ): # pylint: disable=too-many-arguments
+        self,
+        plex_user: str,
+        tvtime_username: str = None,
+        tvtime_password: str = None,
+        driver_location: str = None,
+        browser_location: str = None,
+    ):  # pylint: disable=too-many-arguments
         """
         Initializes a new instance of the TVTime class.
 
@@ -60,8 +65,7 @@ class TVTime():
 
         try:
             log.info("Initializing Firefox driver...")
-            self.driver = webdriver.Firefox(
-                service=Service(driver_location), options=options)
+            self.driver = webdriver.Firefox(service=Service(driver_location), options=options)
         except Exception as _:  # pylint: disable=broad-except
             log.error("Error initializing Firefox driver: %s ", _)
             sys.exit(1)
@@ -92,7 +96,8 @@ class TVTime():
             # We need to fetch a JWT token from the local storage in order to connect
             try:
                 jwt_token = driver.execute_script(
-                    "return window.localStorage.getItem('flutter.jwtToken');")
+                    "return window.localStorage.getItem('flutter.jwtToken');"
+                )
                 if jwt_token:
                     break
             except Exception as _:  # pylint: disable=broad-except
@@ -100,8 +105,7 @@ class TVTime():
                 break
 
         if jwt_token is None:
-            log.error(
-                "Unable to fetch JWT token using Selenium, application must exit.")
+            log.error("Unable to fetch JWT token using Selenium, application must exit.")
             driver.quit()
             sys.exit(1)
         log.info("JWT token fetched successfully ! Exiting Selenium...")
@@ -110,24 +114,15 @@ class TVTime():
         jwt_token = jwt_token.strip('"')
 
         headers = {
-            'Authorization': f'Bearer {jwt_token}',
-            'Content-Type': 'application/json',
+            "Authorization": f"Bearer {jwt_token}",
+            "Content-Type": "application/json",
         }
-        credentials = {
-            "username": self.username,
-            "password": self.password
-        }
+        credentials = {"username": self.username, "password": self.password}
         log.debug("Trying to connect to %s's TVTime account...", self.user)
-        login_url = (
-            'https://beta-app.tvtime.com/sidecar?'
-            'o=https://auth.tvtime.com/v1/login'
-        )
+        login_url = "https://beta-app.tvtime.com/sidecar?" "o=https://auth.tvtime.com/v1/login"
         try:
             r = requests.post(
-                url=login_url,
-                headers=headers,
-                data=json.dumps(credentials),
-                timeout=(5, 10)
+                url=login_url, headers=headers, data=json.dumps(credentials), timeout=(5, 10)
             )
         except requests.exceptions.RequestException as _:
             log.error("Error connecting to TVTime API : %s", _)
@@ -170,22 +165,19 @@ class TVTime():
             log.error("Invalid episode ID provided")
 
         headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json',
-            'Host': f'{BASE_URL}:80'
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+            "Host": f"{BASE_URL}:80",
         }
 
         watch_api = (
-            f'https://{BASE_URL}/sidecar?'
-            f'o=https://api2.tozelabs.com/v2/watched_episodes/episode/{episode_id}'
-            '&is_rewatch=0'
+            f"https://{BASE_URL}/sidecar?"
+            f"o=https://api2.tozelabs.com/v2/watched_episodes/episode/{episode_id}"
+            "&is_rewatch=0"
         )
         try:
             r = requests.post(
-                url=watch_api,
-                headers=headers,
-                data=json.dumps(self.refresh_token),
-                timeout=(5, 10)
+                url=watch_api, headers=headers, data=json.dumps(self.refresh_token), timeout=(5, 10)
             )
         except requests.exceptions.RequestException as _:
             log.error("Error connecting to TVTime API : %s", _)
@@ -195,10 +187,7 @@ class TVTime():
         except json.JSONDecodeError as _:
             log.error("Error decoding JSON response: %s", _)
             if retry:
-                log.error(
-                    "Error while watching movie a second time !"
-                    "Something is not right..."
-                )
+                log.error("Error while watching movie a second time !" "Something is not right...")
                 return
             log.debug("Maybe the jwt token has expired, trying to refresh it...")
             self.login()
@@ -215,7 +204,8 @@ class TVTime():
         show = result.get("show").get("name")
 
         log.info(
-            "[%s] Successfully marked %s S%sE%s as watched !", self.user, show, season, episode)
+            "[%s] Successfully marked %s S%sE%s as watched !", self.user, show, season, episode
+        )
 
     def watch_movie(self, movie_uuid: str, retry: bool = False) -> None:
         """
@@ -232,9 +222,9 @@ class TVTime():
         """
 
         headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json',
-            'Host': f'{BASE_URL}:80'
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+            "Host": f"{BASE_URL}:80",
         }
 
         watch_api = (
@@ -242,11 +232,7 @@ class TVTime():
             f"o=https://msapi.tvtime.com/prod/v1/tracking/{movie_uuid}/watch"
         )
         try:
-            r = requests.post(
-                url=watch_api,
-                headers=headers,
-                timeout=(5, 10)
-            )
+            r = requests.post(url=watch_api, headers=headers, timeout=(5, 10))
         except requests.exceptions.RequestException as _:
             log.error("Error connecting to TVTime API: %s", _)
             return
@@ -256,10 +242,7 @@ class TVTime():
         except json.JSONDecodeError as _:
             log.error("Error decoding JSON response: %s", _)
             if retry:
-                log.error(
-                    "Error while watching movie a second time !"
-                    "Something is not right..."
-                )
+                log.error("Error while watching movie a second time !" "Something is not right...")
                 return
             log.debug("Maybe the jwt token has expired, trying to refresh it...")
             self.login()
@@ -288,9 +271,9 @@ class TVTime():
             log.error("Invalid movie ID provided")
 
         headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json',
-            'Host': f'{BASE_URL}:80'
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+            "Host": f"{BASE_URL}:80",
         }
         search_url = (
             f"https://{BASE_URL}/sidecar?"
@@ -298,11 +281,7 @@ class TVTime():
             "&offset=0&limit=1"
         )
         try:
-            r = requests.get(
-                url=search_url,
-                headers=headers,
-                timeout=(5, 10)
-            )
+            r = requests.get(url=search_url, headers=headers, timeout=(5, 10))
         except requests.exceptions.RequestException as _:
             log.error("Error connecting to TVTime API : %s", _)
 
