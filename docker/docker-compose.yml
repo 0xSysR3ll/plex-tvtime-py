@@ -1,6 +1,6 @@
 services:
   plex-tvtime-py:
-    image: 0xsysr3ll/plex-tvtime-py:latest
+    image: ghcr.io/0xsysr3ll/plex-tvtime-py:latest
     container_name: plex-tvtime-py
     ports:
       - "5000:5000"
