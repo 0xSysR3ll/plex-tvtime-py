@@ -9,6 +9,12 @@ services:
         target: /app/config/config.yml
     environment:
       - TZ=Etc/UTC # Set your timezone
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     network_mode: Host
 
 configs:

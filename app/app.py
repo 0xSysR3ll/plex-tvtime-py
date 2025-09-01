@@ -214,6 +214,32 @@ class WebhookHandler:
 
         return WebhookHandler.handle_media(webhook_data)
 
+    @staticmethod
+    @app.route("/health", methods=["GET"])
+    def health_check():
+        """
+        Health check endpoint for monitoring the service status.
+
+        Returns:
+            A JSON response indicating the service health status.
+        """
+        try:
+            users = config.get_config_of("users")
+            if not users:
+                return {"status": "unhealthy", "error": "No users configured"}, 503
+
+            if not hasattr(Webhook, "tvtime") or Webhook.tvtime is None:
+                return {"status": "unhealthy", "error": "TVTime not initialized"}, 503
+
+            if not Webhook.tvtime.token:
+                return {"status": "unhealthy", "error": "TVTime not authenticated"}, 503
+
+            return {"status": "healthy", "service": "plex-tvtime-py"}, 200
+
+        except Exception as e:
+            log.error("Health check failed: %s", e)
+            return {"status": "unhealthy", "error": str(e)}, 503
+
 
 if __name__ == "__main__":
     USERS = config.get_config_of("users")
