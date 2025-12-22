@@ -4,5 +4,5 @@ Requests==2.32.5
 selenium==4.39.0
 termcolor==3.2.0
 Werkzeug==3.1.4
-ruff==0.14.9
+ruff==0.14.10
 black==25.12.0
